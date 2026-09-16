@@ -10,7 +10,6 @@ import {
   Calendar,
   Clock,
   Sparkles,
-  Share2,
   ExternalLink,
   Navigation,
 } from "lucide-react";
@@ -91,24 +90,6 @@ export default function SnowWhiteTheme({ data }) {
     setConfirmed(true);
   };
 
-  const handleShare = async () => {
-    const shareData = {
-      title: `Aniversário da ${info.childName}`,
-      text: info.message,
-      url: window.location.href,
-    };
-    if (navigator.share) {
-      try {
-        await navigator.share(shareData);
-      } catch {
-        // usuário cancelou o compartilhamento
-      }
-    } else {
-      await navigator.clipboard.writeText(window.location.href);
-      alert("Link copiado para a área de transferência!");
-    }
-  };
-
   const copyPixKey = async () => {
     await navigator.clipboard.writeText(info.pixKey);
     alert("Chave Pix copiada!");
@@ -152,59 +133,6 @@ export default function SnowWhiteTheme({ data }) {
           </button>
         )}
 
-        {/* overlay que surge sobre o último frame do vídeo e permanece, sem escurecer o frame */}
-        <AnimatePresence>
-          {videoEnded && (
-            <>
-              <motion.div
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6 }}
-                className="absolute inset-x-0 top-0 z-10 flex justify-center px-6 pt-8"
-              >
-                <h1
-                  style={{
-                    fontFamily: "'Fredoka', sans-serif",
-                    fontWeight: 700,
-                    WebkitTextStroke: "2.5px #dc2626",
-                    textShadow: "0 3px 6px rgba(0,0,0,0.5)",
-                  }}
-                  className="text-center text-4xl leading-tight text-amber-50"
-                >
-                  {info.childName} está fazendo {info.age} ano{info.age === 1 ? "" : "s"}!
-                </h1>
-              </motion.div>
-
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.15 }}
-                className="absolute inset-x-0 bottom-8 z-10 flex justify-center px-6"
-              >
-                <motion.a
-                  href="#convite"
-                  onClick={(event) => {
-                    event.preventDefault();
-                    setActivePanel("home");
-                  }}
-                  whileTap={{ scale: 0.95 }}
-                  className="relative flex h-24 w-24 items-center justify-center"
-                  aria-label="Ver mais"
-                >
-                  {/* folha */}
-                  <span className="absolute -top-1 left-1/2 h-4 w-6 -translate-x-2 rotate-[-30deg] rounded-full bg-emerald-500" />
-                  {/* cabinho */}
-                  <span className="absolute -top-2 left-1/2 h-4 w-1.5 -translate-x-1/2 rounded-full bg-amber-800" />
-                  {/* corpo da maçã */}
-                  <span className="absolute inset-x-0 bottom-0 top-2 rounded-[50%_50%_46%_46%/60%_60%_40%_40%] bg-red-600 shadow-lg shadow-red-900/50" />
-                  <span className="relative z-10 px-2 text-center text-sm font-bold leading-tight text-amber-50">
-                    Ver mais
-                  </span>
-                </motion.a>
-              </motion.div>
-            </>
-          )}
-        </AnimatePresence>
       </section>
 
       <AnimatePresence>
@@ -215,14 +143,9 @@ export default function SnowWhiteTheme({ data }) {
             animate={{ opacity: 1 }}
             className="absolute inset-0 z-10 flex flex-col justify-end bg-blue-950/35 px-4 pb-5 pt-16"
           >
-            <div className="mb-4 text-center text-amber-50 drop-shadow-lg">
-              <p className="text-xs font-bold uppercase tracking-[0.25em] text-amber-300">Você está convidado</p>
-              <h2 className="mt-2 text-3xl font-bold">{info.childName} faz {info.age} ano{info.age === 1 ? "" : "s"}!</h2>
-            </div>
-
             <motion.div
               layout
-              className="rounded-3xl border border-amber-200/50 bg-amber-50/95 p-4 shadow-2xl shadow-blue-950/40"
+              className="rounded-3xl border border-amber-100/50 bg-amber-50/70 p-4 shadow-2xl shadow-blue-950/40 backdrop-blur-md"
             >
               <AnimatePresence mode="wait">
                 <motion.div
@@ -233,10 +156,15 @@ export default function SnowWhiteTheme({ data }) {
                   transition={{ duration: 0.2 }}
                 >
                   {activePanel === "home" && (
-                    <p className="py-5 text-center text-base italic leading-relaxed text-blue-900">"{info.message}"</p>
+                    <div className="py-2 w-[90%] text-center">
+                      <h1 className="text-3xl font-bold leading-tight text-gray-900">
+                        {info.childName} está fazendo {info.age} ano{info.age === 1 ? "" : "s"}!
+                      </h1>
+                      <p className="mt-4 text-base italic leading-relaxed text-blue-900">"{info.message}"</p>
+                    </div>
                   )}
 
-                  {activePanel === "details" && (
+                  {activePanel === "date" && (
                     <div className="space-y-3 text-blue-950">
                       <div className="flex items-center gap-3 rounded-2xl bg-white/70 p-3">
                         <Calendar className="text-blue-900" size={22} />
@@ -246,10 +174,13 @@ export default function SnowWhiteTheme({ data }) {
                         <Clock className="text-red-600" size={22} />
                         <div><p className="text-xs font-bold uppercase text-blue-700">Horário</p><p className="font-bold">{info.time}</p></div>
                       </div>
-                      <div className="flex items-start gap-3 rounded-2xl bg-white/70 p-3">
-                        <MapPin className="mt-1 text-amber-600" size={22} />
-                        <div><p className="text-xs font-bold uppercase text-blue-700">Endereço</p><p className="font-bold">{info.locationName}</p><p className="text-sm text-blue-800/80">{info.address}</p><a href={info.googleMapsUrl} target="_blank" rel="noopener noreferrer" className="mt-1 inline-flex items-center gap-1 text-sm font-bold text-red-600"><Navigation size={14} /> Ver no mapa</a></div>
-                      </div>
+                    </div>
+                  )}
+
+                  {activePanel === "location" && (
+                    <div className="flex items-start gap-3 rounded-2xl bg-white/70 p-3 text-blue-950">
+                      <MapPin className="mt-1 text-amber-600" size={22} />
+                      <div><p className="text-xs font-bold uppercase text-blue-700">Endereço</p><p className="font-bold">{info.locationName}</p><p className="text-sm text-blue-800/80">{info.address}</p><a href={info.googleMapsUrl} target="_blank" rel="noopener noreferrer" className="mt-1 inline-flex items-center gap-1 text-sm font-bold text-red-600"><Navigation size={14} /> Ver no mapa</a></div>
                     </div>
                   )}
 
@@ -272,8 +203,8 @@ export default function SnowWhiteTheme({ data }) {
               </AnimatePresence>
 
               <nav className="mt-4 grid grid-cols-5 gap-2 border-t border-blue-900/10 pt-3" aria-label="Informações do convite">
-                {[{ id: "home", label: "Início", icon: Sparkles }, { id: "details", label: "Quando", icon: Calendar }, { id: "details", label: "Onde", icon: MapPin }, { id: "gifts", label: "Presentes", icon: Gift }, { id: "confirm", label: "Confirmar", icon: CheckCircle2 }].map((item, index) => (
-                  <button key={`${item.id}-${index}`} onClick={() => setActivePanel(item.id)} className={`flex min-w-0 flex-col items-center gap-1 rounded-xl px-1 py-2 text-[10px] font-bold ${activePanel === item.id ? "bg-blue-900 text-amber-50" : "text-blue-800"}`}>
+                {[{ id: "home", label: "Início", icon: Sparkles }, { id: "date", label: "Quando", icon: Calendar }, { id: "location", label: "Onde", icon: MapPin }, { id: "gifts", label: "Presentes", icon: Gift }, { id: "confirm", label: "Confirmar", icon: CheckCircle2 }].map((item, index) => (
+                  <button key={`${item.id}-${index}`} onClick={() => setActivePanel(item.id)} className={`flex min-w-0 flex-col items-center gap-1 rounded-xl px-1 py-2 text-[10px] font-bold ${activePanel === item.id ? "bg-white text-blue-900" : "text-blue-800"}`}>
                     {createElement(item.icon, { size: 18 })}
                     <span className="truncate">{item.label}</span>
                   </button>
@@ -281,7 +212,6 @@ export default function SnowWhiteTheme({ data }) {
               </nav>
             </motion.div>
 
-            <button onClick={handleShare} className="mx-auto mt-3 flex items-center gap-2 rounded-full bg-amber-50/90 px-4 py-2 text-sm font-bold text-blue-900 shadow-lg"><Share2 size={16} /> Compartilhar convite</button>
           </motion.main>
         )}
       </AnimatePresence>
