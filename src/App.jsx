@@ -1,12 +1,12 @@
 import './App.css'
-import Dino from './DinosaurTheme'
+import SnowWhiteTheme from './templates/themes/SnowWhiteTheme'
 
 function App() {
   
 
   return (
     <>
-      <Dino />
+      <SnowWhiteTheme />
     </>
   )
 }
