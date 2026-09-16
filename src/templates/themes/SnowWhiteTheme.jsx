@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { createElement, useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Volume2,
@@ -38,20 +38,6 @@ const defaultData = {
   message: "Espelho, espelho meu... Existe festa mais divertida que a minha?",
 };
 
-function SectionCard({ children, className = "", delay = 0 }) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 30 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.3 }}
-      transition={{ duration: 0.6, delay, ease: "easeOut" }}
-      className={`relative rounded-3xl border-2 border-amber-400/40 bg-amber-50 p-5 shadow-lg shadow-blue-950/10 ${className}`}
-    >
-      {children}
-    </motion.div>
-  );
-}
-
 export default function SnowWhiteTheme({ data }) {
   const info = { ...defaultData, ...data };
 
@@ -59,7 +45,7 @@ export default function SnowWhiteTheme({ data }) {
   const [videoEnded, setVideoEnded] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
   const [guestName, setGuestName] = useState("");
-  const [giftsOpen, setGiftsOpen] = useState(false);
+  const [activePanel, setActivePanel] = useState("home");
   const videoRef = useRef(null);
 
   useEffect(() => {
@@ -129,9 +115,9 @@ export default function SnowWhiteTheme({ data }) {
   };
 
   return (
-    <div className="relative min-h-screen w-full max-w-md mx-auto overflow-x-hidden bg-amber-50 font-sans text-blue-900">
+    <div className="relative h-dvh w-full max-w-md mx-auto overflow-hidden bg-blue-950 font-sans text-blue-900">
       {/* INTRO EM VÍDEO FULLSCREEN */}
-      <section className="relative h-dvh w-full overflow-hidden bg-blue-950">
+      <section className="absolute inset-0 overflow-hidden bg-blue-950">
         {info.videoUrl && (
           <video
             ref={videoRef}
@@ -196,7 +182,11 @@ export default function SnowWhiteTheme({ data }) {
                 className="absolute inset-x-0 bottom-8 z-10 flex justify-center px-6"
               >
                 <motion.a
-                  href="#detalhes"
+                  href="#convite"
+                  onClick={(event) => {
+                    event.preventDefault();
+                    setActivePanel("home");
+                  }}
                   whileTap={{ scale: 0.95 }}
                   className="relative flex h-24 w-24 items-center justify-center"
                   aria-label="Ver mais"
@@ -217,200 +207,84 @@ export default function SnowWhiteTheme({ data }) {
         </AnimatePresence>
       </section>
 
-      {/* MENSAGEM */}
-      <section id="detalhes" className="relative z-10 -mt-8 px-5">
-        <SectionCard>
-          <p className="text-center text-base italic leading-relaxed text-blue-900">
-            "{info.message}"
-          </p>
-        </SectionCard>
-      </section>
-
-      {/* DATA, HORA E LOCAL */}
-      <section className="mt-6 space-y-4 px-5">
-        <SectionCard delay={0.1} className="flex items-center gap-4">
-          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-blue-900 text-amber-50">
-            <Calendar size={24} />
-          </span>
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-blue-700">
-              {info.dayOfWeek}
-            </p>
-            <p className="text-lg font-bold text-blue-950">
-              {info.formattedDate}
-            </p>
-          </div>
-        </SectionCard>
-
-        <SectionCard delay={0.2} className="flex items-center gap-4">
-          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-red-600 text-amber-50">
-            <Clock size={24} />
-          </span>
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-blue-700">
-              Horário
-            </p>
-            <p className="text-lg font-bold text-blue-950">{info.time}</p>
-          </div>
-        </SectionCard>
-
-        <SectionCard delay={0.3} className="flex items-start gap-4">
-          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-amber-400 text-blue-950">
-            <MapPin size={24} />
-          </span>
-          <div className="flex-1">
-            <p className="text-xs font-semibold uppercase tracking-wide text-blue-700">
-              Local
-            </p>
-            <p className="text-lg font-bold text-blue-950">
-              {info.locationName}
-            </p>
-            <p className="mt-1 text-sm text-blue-800/80">{info.address}</p>
-            <a
-              href={info.googleMapsUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-2 inline-flex items-center gap-1 text-sm font-semibold text-red-600 underline underline-offset-2"
-            >
-              <Navigation size={14} />
-              Ver no mapa
-            </a>
-          </div>
-        </SectionCard>
-      </section>
-
-      {/* LISTA DE PRESENTES */}
-      <section className="mt-6 px-5">
-        <SectionCard delay={0.1}>
-          <button
-            onClick={() => setGiftsOpen((prev) => !prev)}
-            className="flex w-full items-center justify-between gap-3"
+      <AnimatePresence>
+        {videoEnded && (
+          <motion.main
+            id="convite"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="absolute inset-0 z-10 flex flex-col justify-end bg-blue-950/35 px-4 pb-5 pt-16"
           >
-            <span className="flex items-center gap-3 text-lg font-bold text-blue-950">
-              <Gift size={22} className="text-red-600" />
-              Lista de presentes
-            </span>
-            <motion.span
-              animate={{ rotate: giftsOpen ? 180 : 0 }}
-              className="text-blue-700"
+            <div className="mb-4 text-center text-amber-50 drop-shadow-lg">
+              <p className="text-xs font-bold uppercase tracking-[0.25em] text-amber-300">Você está convidado</p>
+              <h2 className="mt-2 text-3xl font-bold">{info.childName} faz {info.age} ano{info.age === 1 ? "" : "s"}!</h2>
+            </div>
+
+            <motion.div
+              layout
+              className="rounded-3xl border border-amber-200/50 bg-amber-50/95 p-4 shadow-2xl shadow-blue-950/40"
             >
-              ▾
-            </motion.span>
-          </button>
-
-          <AnimatePresence>
-            {giftsOpen && (
-              <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: "auto", opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                className="overflow-hidden"
-              >
-                <ul className="mt-4 space-y-2">
-                  {info.suggestedGifts.map((gift, i) => (
-                    <li
-                      key={i}
-                      className="flex items-center gap-2 text-sm text-blue-900"
-                    >
-                      <span className="text-amber-500">🍎</span>
-                      {gift}
-                    </li>
-                  ))}
-                </ul>
-
-                {info.giftListUrl && (
-                  <a
-                    href={info.giftListUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="mt-4 flex items-center justify-center gap-2 rounded-xl bg-blue-900 px-4 py-3 text-sm font-bold text-amber-50"
-                  >
-                    Ver lista completa
-                    <ExternalLink size={14} />
-                  </a>
-                )}
-
-                {info.pixKey && (
-                  <button
-                    onClick={copyPixKey}
-                    className="mt-2 w-full rounded-xl border-2 border-amber-400 px-4 py-3 text-sm font-bold text-blue-900"
-                  >
-                    Copiar chave Pix
-                  </button>
-                )}
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </SectionCard>
-      </section>
-
-      {/* CONFIRMAÇÃO DE PRESENÇA */}
-      <section className="mt-6 px-5">
-        <SectionCard delay={0.1} className="bg-blue-900 text-amber-50">
-          <h3 className="flex items-center justify-center gap-2 text-center text-lg font-bold">
-            <Sparkles size={18} className="text-amber-400" />
-            Confirme sua presença
-          </h3>
-
-          <AnimatePresence mode="wait">
-            {confirmed ? (
-              <motion.div
-                key="success"
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.8 }}
-                className="mt-4 flex flex-col items-center gap-2 text-center"
-              >
-                <CheckCircle2 size={40} className="text-amber-400" />
-                <p className="font-semibold">
-                  Presença confirmada, {guestName}! Até o baile encantado 🏰
-                </p>
-              </motion.div>
-            ) : (
-              <motion.form
-                key="form"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                onSubmit={handleConfirm}
-                className="mt-4 flex flex-col gap-3"
-              >
-                <input
-                  type="text"
-                  value={guestName}
-                  onChange={(e) => setGuestName(e.target.value)}
-                  placeholder="Seu nome"
-                  required
-                  className="w-full rounded-xl border border-amber-200/30 bg-amber-50/10 px-4 py-3 text-amber-50 placeholder-amber-200/60 outline-none focus:border-amber-400"
-                />
-                <motion.button
-                  whileTap={{ scale: 0.96 }}
-                  type="submit"
-                  className="w-full rounded-xl bg-red-600 px-4 py-3 font-bold text-amber-50 shadow-md shadow-red-900/30 transition-colors hover:bg-red-700"
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={activePanel}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: 0.2 }}
                 >
-                  Confirmar presença
-                </motion.button>
-              </motion.form>
-            )}
-          </AnimatePresence>
-        </SectionCard>
-      </section>
+                  {activePanel === "home" && (
+                    <p className="py-5 text-center text-base italic leading-relaxed text-blue-900">"{info.message}"</p>
+                  )}
 
-      {/* AÇÕES FINAIS */}
-      <section className="mt-6 flex justify-center gap-4 px-5 pb-12">
-        <motion.button
-          whileTap={{ scale: 0.94 }}
-          onClick={handleShare}
-          className="flex items-center gap-2 rounded-full border-2 border-blue-900 bg-amber-50 px-5 py-3 font-semibold text-blue-900 shadow-sm"
-        >
-          <Share2 size={18} />
-          Compartilhar
-        </motion.button>
-      </section>
+                  {activePanel === "details" && (
+                    <div className="space-y-3 text-blue-950">
+                      <div className="flex items-center gap-3 rounded-2xl bg-white/70 p-3">
+                        <Calendar className="text-blue-900" size={22} />
+                        <div><p className="text-xs font-bold uppercase text-blue-700">Data</p><p className="font-bold">{info.dayOfWeek}, {info.formattedDate}</p></div>
+                      </div>
+                      <div className="flex items-center gap-3 rounded-2xl bg-white/70 p-3">
+                        <Clock className="text-red-600" size={22} />
+                        <div><p className="text-xs font-bold uppercase text-blue-700">Horário</p><p className="font-bold">{info.time}</p></div>
+                      </div>
+                      <div className="flex items-start gap-3 rounded-2xl bg-white/70 p-3">
+                        <MapPin className="mt-1 text-amber-600" size={22} />
+                        <div><p className="text-xs font-bold uppercase text-blue-700">Endereço</p><p className="font-bold">{info.locationName}</p><p className="text-sm text-blue-800/80">{info.address}</p><a href={info.googleMapsUrl} target="_blank" rel="noopener noreferrer" className="mt-1 inline-flex items-center gap-1 text-sm font-bold text-red-600"><Navigation size={14} /> Ver no mapa</a></div>
+                      </div>
+                    </div>
+                  )}
 
-      <footer className="pb-8 text-center text-xs text-blue-800/60">
-        Feito com 💙 no ConviteJá
-      </footer>
+                  {activePanel === "gifts" && (
+                    <div className="text-blue-950">
+                      <h3 className="flex items-center gap-2 text-lg font-bold"><Gift size={21} className="text-red-600" /> Dicas de presente</h3>
+                      <ul className="mt-3 space-y-2 text-sm">{info.suggestedGifts.map((gift, index) => <li key={index} className="flex gap-2"><span className="text-red-600">♥</span>{gift}</li>)}</ul>
+                      {info.giftListUrl && <a href={info.giftListUrl} target="_blank" rel="noopener noreferrer" className="mt-4 flex items-center justify-center gap-2 rounded-xl bg-blue-900 px-4 py-3 text-sm font-bold text-amber-50">Ver lista completa <ExternalLink size={14} /></a>}
+                      {info.pixKey && <button onClick={copyPixKey} className="mt-2 w-full rounded-xl border-2 border-amber-400 px-4 py-3 text-sm font-bold text-blue-900">Copiar chave Pix</button>}
+                    </div>
+                  )}
+
+                  {activePanel === "confirm" && (
+                    <div className="rounded-2xl bg-blue-900 p-4 text-amber-50">
+                      <h3 className="flex items-center justify-center gap-2 text-center text-lg font-bold"><Sparkles size={18} className="text-amber-400" /> Confirme sua presença</h3>
+                      {confirmed ? <div className="mt-4 flex flex-col items-center gap-2 text-center"><CheckCircle2 size={38} className="text-amber-400" /><p className="font-semibold">Presença confirmada, {guestName}!</p></div> : <form onSubmit={handleConfirm} className="mt-4 flex flex-col gap-3"><input type="text" value={guestName} onChange={(event) => setGuestName(event.target.value)} placeholder="Seu nome" required className="w-full rounded-xl border border-amber-200/30 bg-amber-50/10 px-4 py-3 text-amber-50 placeholder-amber-200/60 outline-none focus:border-amber-400" /><button type="submit" className="w-full rounded-xl bg-red-600 px-4 py-3 font-bold text-amber-50">Confirmar presença</button></form>}
+                    </div>
+                  )}
+                </motion.div>
+              </AnimatePresence>
+
+              <nav className="mt-4 grid grid-cols-5 gap-2 border-t border-blue-900/10 pt-3" aria-label="Informações do convite">
+                {[{ id: "home", label: "Início", icon: Sparkles }, { id: "details", label: "Quando", icon: Calendar }, { id: "details", label: "Onde", icon: MapPin }, { id: "gifts", label: "Presentes", icon: Gift }, { id: "confirm", label: "Confirmar", icon: CheckCircle2 }].map((item, index) => (
+                  <button key={`${item.id}-${index}`} onClick={() => setActivePanel(item.id)} className={`flex min-w-0 flex-col items-center gap-1 rounded-xl px-1 py-2 text-[10px] font-bold ${activePanel === item.id ? "bg-blue-900 text-amber-50" : "text-blue-800"}`}>
+                    {createElement(item.icon, { size: 18 })}
+                    <span className="truncate">{item.label}</span>
+                  </button>
+                ))}
+              </nav>
+            </motion.div>
+
+            <button onClick={handleShare} className="mx-auto mt-3 flex items-center gap-2 rounded-full bg-amber-50/90 px-4 py-2 text-sm font-bold text-blue-900 shadow-lg"><Share2 size={16} /> Compartilhar convite</button>
+          </motion.main>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
